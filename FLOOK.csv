@@ -1,0 +1,4 @@
+store_id,store_name,category,menu_name,menu_price,rating,review_count,delivery_fee,coupon_discount,min_order_price,takeout_discount ,estimated_delivery_time,positive_keywords,negtive_keywords
+1,바삭치킨,치킨,후라이드치킨,16000,4.1,124,3000,3000,15000,1000,45,저렴함|양많음,배달지연|식음
+2,황금치킨,치킨,후라이드치킨,17000,4.7,521,2000,2000,15000,0,32,바삭함|빠름|재주문,비쌈
+3,청춘분식,분식,떡볶이세트,12000,4.5,218,2500,1000,12000,500,38,맛있음|가성비|양많음,맵기강함

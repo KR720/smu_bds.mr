@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>FLOOK AI</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+    <header class="hero">
+        <div class="hero-inner">
+
+            <p class="hero-label">
+                DATA-DRIVEN FOOD RECOMMENDATION
+            </p>
+
+            <h1>FLOOK AI</h1>
+
+            <p class="hero-description">
+                예산, 평점, 배달시간과 리뷰 데이터를 분석해
+                가장 적합한 메뉴를 추천합니다.
+            </p>
+
+            <div class="data-badge">
+                현재 {{ stores_count }}개의 메뉴 분석 가능
+            </div>
+
+        </div>
+    </header>
+
+
+    <main class="main-container">
+
+        <!-- 입력 영역 -->
+        <section class="search-panel">
+
+            <div class="section-title">
+                <span>01</span>
+
+                <div>
+                    <h2>추천 조건 입력</h2>
+                    <p>
+                        원하는 주문 조건을 선택해주세요.
+                    </p>
+                </div>
+            </div>
+
+
+            <form method="post" action="/" class="recommend-form">
+
+                <div class="form-group">
+                    <label for="budget">
+                        최대 주문 예산
+                    </label>
+
+                    <div class="input-wrapper">
+                        <input
+                            type="number"
+                            id="budget"
+                            name="budget"
+                            min="1"
+                            step="100"
+                            value="{{ form_data.budget }}"
+                            required
+                        >
+
+                        <span>원</span>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="category">
+                        음식 카테고리
+                    </label>
+
+                    <select
+                        id="category"
+                        name="category"
+                        required
+                    >
+                        {% for category in categories %}
+                            <option
+                                value="{{ category }}"
+                                {% if form_data.category == category %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ category }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="max_delivery_time">
+                        최대 배달시간
+                    </label>
+
+                    <div class="input-wrapper">
+                        <input
+                            type="number"
+                            id="max_delivery_time"
+                            name="max_delivery_time"
+                            min="1"
+                            value="{{ form_data.max_delivery_time }}"
+                            required
+                        >
+
+                        <span>분</span>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="priority">
+                        추천 우선순위
+                    </label>
+
+                    <select
+                        id="priority"
+                        name="priority"
+                        required
+                    >
+                        {% for priority in priorities %}
+                            <option
+                                value="{{ priority }}"
+                                {% if form_data.priority == priority %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ priority }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+
+                <button type="submit" class="recommend-button">
+                    FLOOK AI 추천받기
+                </button>
+
+            </form>
+
+
+            {% if error_message %}
+                <div class="error-message">
+                    {{ error_message }}
+                </div>
+            {% endif %}
+
+        </section>
+
+
+        <!-- 추천 버튼을 누른 뒤 표시 -->
+        {% if searched %}
+
+            <section class="result-panel">
+
+                <div class="section-title">
+                    <span>02</span>
+
+                    <div>
+                        <h2>추천 결과</h2>
+                        <p>
+                            입력 조건을 분석한 상위 메뉴입니다.
+                        </p>
+                    </div>
+                </div>
+
+
+                <!-- Gemini 분석 -->
+                {% if ai_summary %}
+                    <div class="ai-summary">
+
+                        <div class="ai-summary-header">
+                            <span class="ai-badge">
+                                AI
+                            </span>
+
+                            <h3>
+                                FLOOK AI 추천 분석
+                            </h3>
+                        </div>
+
+                        <p>
+                            {{ ai_summary }}
+                        </p>
+
+                    </div>
+                {% endif %}
+
+
+                {% if recommendations %}
+
+                    <div class="result-grid">
+
+                        {% for store in recommendations %}
+
+                            <article
+                                class="result-card
+                                {% if loop.first %}
+                                    first-result
+                                {% endif %}"
+                            >
+
+                                <div class="card-top">
+
+                                    <span class="rank-badge">
+                                        추천 {{ loop.index }}위
+                                    </span>
+
+                                    <div class="score-box">
+                                        <strong>
+                                            {{ store.score }}
+                                        </strong>
+                                        <span>점</span>
+                                    </div>
+
+                                </div>
+
+
+                                <p class="category-text">
+                                    {{ store.category }}
+                                </p>
+
+                                <h3 class="store-name">
+                                    {{ store.store_name }}
+                                </h3>
+
+                                <p class="menu-name">
+                                    {{ store.menu_name }}
+                                </p>
+
+
+                                <div class="price-section">
+
+                                    <div>
+                                        <span>메뉴 가격</span>
+
+                                        <strong>
+                                            {{ "{:,}".format(store.menu_price) }}원
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <span>배달비</span>
+
+                                        <strong>
+                                            +{{ "{:,}".format(store.delivery_fee) }}원
+                                        </strong>
+                                    </div>
+
+
+                                    <div>
+                                        <span>쿠폰 할인</span>
+
+                                        <strong class="discount-text">
+                                            -{{ "{:,}".format(store.coupon_discount) }}원
+                                        </strong>
+                                    </div>
+
+
+                                    <div class="final-price">
+                                        <span>최종 결제금액</span>
+
+                                        <strong>
+                                            {{ "{:,}".format(store.final_price) }}원
+                                        </strong>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="information-grid">
+
+                                    <div class="information-box">
+                                        <span>평점</span>
+
+                                        <strong>
+                                            ★ {{ store.rating }}
+                                        </strong>
+                                    </div>
+
+
+                                    <div class="information-box">
+                                        <span>리뷰 수</span>
+
+                                        <strong>
+                                            {{ "{:,}".format(store.review_count) }}개
+                                        </strong>
+                                    </div>
+
+
+                                    <div class="information-box">
+                                        <span>배달시간</span>
+
+                                        <strong>
+                                            {{ store.estimated_delivery_time }}분
+                                        </strong>
+                                    </div>
+
+
+                                    <div class="information-box">
+                                        <span>최소 주문</span>
+
+                                        <strong>
+                                            {{ "{:,}".format(store.min_order_price) }}원
+                                        </strong>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="review-section">
+
+                                    <p class="review-title">
+                                        긍정 리뷰
+                                    </p>
+
+                                    <div class="keyword-list positive-list">
+
+                                        {% if store.positive_keywords %}
+
+                                            {% for keyword in store.positive_keywords %}
+                                                <span>
+                                                    {{ keyword }}
+                                                </span>
+                                            {% endfor %}
+
+                                        {% else %}
+                                            <span>정보 없음</span>
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    <p class="review-title negative-title">
+                                        주의 리뷰
+                                    </p>
+
+                                    <div class="keyword-list negative-list">
+
+                                        {% if store.negative_keywords %}
+
+                                            {% for keyword in store.negative_keywords %}
+                                                <span>
+                                                    {{ keyword }}
+                                                </span>
+                                            {% endfor %}
+
+                                        {% else %}
+                                            <span>정보 없음</span>
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+
+                                {% if store.score_details %}
+
+                                    <details class="score-details">
+
+                                        <summary>
+                                            세부 점수 보기
+                                        </summary>
+
+                                        <div class="score-list">
+
+                                            <div>
+                                                <span>가격 점수</span>
+                                                <strong>
+                                                    {{ store.score_details.price_score }}
+                                                </strong>
+                                            </div>
+
+                                            <div>
+                                                <span>평점 점수</span>
+                                                <strong>
+                                                    {{ store.score_details.rating_score }}
+                                                </strong>
+                                            </div>
+
+                                            <div>
+                                                <span>리뷰 신뢰도</span>
+                                                <strong>
+                                                    {{ store.score_details.review_score }}
+                                                </strong>
+                                            </div>
+
+                                            <div>
+                                                <span>배달속도</span>
+                                                <strong>
+                                                    {{ store.score_details.delivery_score }}
+                                                </strong>
+                                            </div>
+
+                                            <div>
+                                                <span>키워드 점수</span>
+                                                <strong>
+                                                    {{ store.score_details.keyword_score }}
+                                                </strong>
+                                            </div>
+
+                                        </div>
+
+                                    </details>
+
+                                {% endif %}
+
+                            </article>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                {% else %}
+
+                    <div class="empty-result">
+
+                        <h3>
+                            조건에 맞는 메뉴가 없습니다.
+                        </h3>
+
+                        <p>
+                            예산을 높이거나 최대 배달시간을
+                            늘려서 다시 검색해주세요.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        {% endif %}
+
+    </main>
+
+</body>
+</html>
