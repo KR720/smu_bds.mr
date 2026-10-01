@@ -183,6 +183,6 @@ def load_flook_data():
     except csv.Error as error:
         print("오류: CSV를 읽는 중 문제가 발생했습니다.")
         print(error)
-        return []
+        return []#안녕
 
     return data
