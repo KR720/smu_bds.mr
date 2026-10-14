@@ -1,0 +1,6 @@
+{
+  "name": "JSH Portfolio",
+  "description": "Joo Seung Hwan's highly polished, interactive developer portfolio combining sleek Tesla-style minimalist hero frames with Kakao-style smooth scroll narration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
